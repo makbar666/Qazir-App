@@ -57,7 +57,7 @@ Transaksi baru hanya menerima Tunai dan QRIS. QRIS ketika Midtrans tidak aktif d
 
 Status sinkronisasi muncul pada detail penjualan dan halaman integrasi. Kegagalan dapat dicoba ulang dari layar tersebut. Untuk retry otomatis, jalankan `php artisan schedule:work` di terminal lain atau pasang `php artisan schedule:run` setiap menit di server. Token disimpan terenkripsi di database kasir. Gunakan HTTPS di deployment nyata.
 
-Penukaran poin belum tersedia karena memerlukan reservasi poin sebelum pembayaran. Rancangan lanjutan ada di [`../sistem-point/docs/rancangan-integrasi-pos-tanda.md`](../sistem-point/docs/rancangan-integrasi-pos-tanda.md).
+Penukaran poin di kasir menggunakan reservasi Tanda sebelum pembayaran dicatat. Tunai mengonfirmasi reservasi segera, sedangkan QRIS menunggu status lunas dari Midtrans. Pembatalan QRIS melepaskan reservasi poin.
 
 ## Peringatan stok menipis dan email
 
@@ -66,6 +66,12 @@ Di menu **Stok menipis**, atur batas minimum dan target untuk setiap produk pada
 Untuk email, masukkan maksimal 10 alamat penerima per outlet dan aktifkan **Email harian**. Ringkasan dikirim sekali per hari per alamat bila ada produk menipis, pada pukul `STOCK_ALERT_DAILY_TIME` di zona `STOCK_ALERT_TIMEZONE` (bawaan 08:00 Asia/Jakarta). Jalankan `php artisan schedule:work` saat lokal, atau `php artisan schedule:run` tiap menit pada server. Periksa jadwal dengan `php artisan schedule:list`. Perintah `php artisan stock:alert-low --outlet=ID` tersedia untuk memproses satu outlet secara manual.
 
 Mailer bawaan `MAIL_MAILER=log` hanya menulis email ke `storage/logs/laravel.log`. Agar terkirim ke penerima, atur `MAIL_MAILER=smtp`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM_ADDRESS`, dan `MAIL_FROM_NAME` di `.env` sesuai penyedia email. Atur pula `APP_URL` ke alamat POS yang dapat dibuka penerima agar tautan dalam email benar. Setelah mengubah `.env` pada server yang memakai config cache, jalankan `php artisan config:clear` dan mulai ulang proses scheduler.
+
+## Rekonsiliasi harian per outlet
+
+Owner dan manager membuka **Rekonsiliasi** untuk memilih tanggal pada outlet aktif. Hari operasional mengikuti `RECONCILIATION_TIMEZONE` (bawaan Asia/Jakarta), sementara timestamp database tetap UTC. Halaman memperlihatkan pembayaran berdasarkan tanggal lunas, refund berdasarkan tanggal selesai, catatan kas shift pada tanggal tersebut, selisih kas fisik shift yang ditutup, QRIS manual, dan status QRIS Midtrans. Refund pada hari berikutnya mengurangi hasil hari refund tanpa menghapus pembayaran pada hari penjualan.
+
+Klik **Periksa hingga 10 QRIS ke Midtrans** berulang sampai seluruh transaksi untuk tanggal itu diperiksa. Hasil pemeriksaan disimpan per penjualan; penjualan pending, shift terbuka, atau status QRIS yang belum cocok menghalangi pengesahan. Selisih kas dan QRIS manual dapat disahkan dengan catatan penjelasan. Pengesahan menyimpan ringkasan dan peninjau; jika data sumber berubah, halaman menandai hasil sebelumnya **Perlu tinjau ulang** dan dapat disahkan kembali. Payout Midtrans tidak disamakan dengan pembayaran pelanggan di hari yang sama karena jadwal transfer dan biaya dapat berbeda; cocokkan payout saat dana masuk menggunakan laporan Midtrans.
 
 ## Verifikasi
 

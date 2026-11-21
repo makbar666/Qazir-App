@@ -28,6 +28,7 @@
         ]],
         ['label' => 'Manajemen', 'items' => [
             ['report', 'report', 'Laporan', 'LP'],
+            ['reconciliation', 'reconciliation', 'Rekonsiliasi', 'RK'],
             ['integration', 'integration', 'Integrasi Tanda', 'IT'],
             ['midtrans', 'midtrans.settings', 'QRIS Midtrans', 'QR'],
             ['outlets', 'outlets', 'Outlet', 'OT'],

@@ -18,6 +18,7 @@ class RoleAccess
         'stock_counts' => 'Stok opname',
         'sales' => 'Penjualan',
         'report' => 'Laporan',
+        'reconciliation' => 'Rekonsiliasi harian',
         'integration' => 'Integrasi Tanda',
         'midtrans' => 'QRIS Midtrans',
         'outlets' => 'Outlet',
@@ -32,11 +33,12 @@ class RoleAccess
         'stock_counts_approve' => 'Setujui koreksi stok opname',
         'cash_shifts_manage' => 'Kelola seluruh shift kasir',
         'sales_refund' => 'Catat refund penjualan',
+        'reconciliation_manage' => 'Periksa QRIS dan sahkan rekonsiliasi',
     ];
 
     public const DEFAULTS = [
-        'owner' => ['Owner', ['dashboard', 'checkout', 'shifts', 'products', 'transfers', 'purchases', 'stock_alerts', 'stock_counts', 'sales', 'report', 'integration', 'midtrans', 'outlets'], ['products_manage', 'transfers_manage', 'purchases_manage', 'stock_alerts_manage', 'stock_counts_manage', 'stock_counts_approve', 'cash_shifts_manage', 'sales_refund']],
-        'manager' => ['Manager', ['dashboard', 'checkout', 'shifts', 'products', 'transfers', 'purchases', 'stock_alerts', 'stock_counts', 'sales', 'report'], ['products_manage', 'transfers_manage', 'purchases_manage', 'stock_alerts_manage', 'stock_counts_manage', 'stock_counts_approve', 'cash_shifts_manage', 'sales_refund']],
+        'owner' => ['Owner', ['dashboard', 'checkout', 'shifts', 'products', 'transfers', 'purchases', 'stock_alerts', 'stock_counts', 'sales', 'report', 'reconciliation', 'integration', 'midtrans', 'outlets'], ['products_manage', 'transfers_manage', 'purchases_manage', 'stock_alerts_manage', 'stock_counts_manage', 'stock_counts_approve', 'cash_shifts_manage', 'sales_refund', 'reconciliation_manage']],
+        'manager' => ['Manager', ['dashboard', 'checkout', 'shifts', 'products', 'transfers', 'purchases', 'stock_alerts', 'stock_counts', 'sales', 'report', 'reconciliation'], ['products_manage', 'transfers_manage', 'purchases_manage', 'stock_alerts_manage', 'stock_counts_manage', 'stock_counts_approve', 'cash_shifts_manage', 'sales_refund', 'reconciliation_manage']],
         'cashier' => ['Kasir', ['dashboard', 'checkout', 'shifts', 'products', 'stock_counts', 'sales'], ['stock_counts_manage']],
     ];
 

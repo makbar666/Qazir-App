@@ -12,6 +12,7 @@ use App\Http\Controllers\StockCountController;
 use App\Http\Controllers\CashShiftController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\StockAlertController;
+use App\Http\Controllers\DailyReconciliationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/login',[PosController::class,'login'])->name('login');
@@ -85,4 +86,7 @@ Route::middleware(['auth','active.user'])->group(function(){
     Route::post('/sales/{id}/refund/check',[PosController::class,'checkRefund'])->middleware('menu:sales')->name('sales.refund.check');
     Route::post('/sales/{id}/refund/retry',[PosController::class,'retryRefund'])->middleware('menu:sales')->name('sales.refund.retry');
     Route::get('/report',[PosController::class,'report'])->middleware('menu:report')->name('report');
+    Route::get('/reconciliation',[DailyReconciliationController::class,'index'])->middleware('menu:reconciliation')->name('reconciliation');
+    Route::post('/reconciliation/check',[DailyReconciliationController::class,'check'])->middleware('menu:reconciliation')->name('reconciliation.check');
+    Route::post('/reconciliation/review',[DailyReconciliationController::class,'review'])->middleware('menu:reconciliation')->name('reconciliation.review');
 });
