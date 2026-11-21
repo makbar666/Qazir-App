@@ -59,6 +59,12 @@ Status sinkronisasi muncul pada detail penjualan dan halaman integrasi. Kegagala
 
 Penukaran poin di kasir menggunakan reservasi Tanda sebelum pembayaran dicatat. Tunai mengonfirmasi reservasi segera, sedangkan QRIS menunggu status lunas dari Midtrans. Pembatalan QRIS melepaskan reservasi poin.
 
+### Rekonsiliasi poin Qazir ↔ Tanda
+
+Dari **Integrasi Tanda → Rekonsiliasi poin**, pilih rentang tanggal (maksimal 31 hari). Pemeriksaan membaca penjualan member Qazir yang dibuat, lunas, atau direfund dalam rentang tersebut dan mencocokkannya dengan transaksi serta reservasi pada koneksi Tanda yang aktif. Satu pemeriksaan memproses maksimal 2.000 penjualan; gunakan rentang lebih pendek bila lebih banyak. Hasil disimpan sebagai snapshot dan dapat dibuka lagi dari riwayat.
+
+Hasil **Sesuai** berarti identitas member, outlet, nominal, status, penukaran, dan poin cocok. **Kirim ulang** tersedia bila transaksi atau refund belum tercatat dan aman diulang memakai kunci transaksi yang sama. Tombol ini memeriksa ulang data Tanda sebelum mengirim. **Tinjau manual** berarti ada perbedaan data atau status yang tidak boleh dikoreksi otomatis. Setiap percobaan ulang dicatat beserta pengguna dan hasilnya. Setelah percobaan ulang, jalankan pemeriksaan baru untuk melihat status terbaru. Menu ini mengikuti hak akses **Integrasi Tanda**.
+
 ## Peringatan stok menipis dan email
 
 Di menu **Stok menipis**, atur batas minimum dan target untuk setiap produk pada outlet aktif. Produk muncul saat stok berada pada atau di bawah batas. Kolom **Dalam pesanan** menghitung barang pada pesanan pembelian yang belum diterima; **Saran pesan** adalah target dikurangi stok dan barang dalam pesanan.

@@ -13,6 +13,7 @@ use App\Http\Controllers\CashShiftController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\StockAlertController;
 use App\Http\Controllers\DailyReconciliationController;
+use App\Http\Controllers\LoyaltyReconciliationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/login',[PosController::class,'login'])->name('login');
@@ -37,6 +38,10 @@ Route::middleware(['auth','active.user'])->group(function(){
     Route::post('/sales/{id}/payment/retry',[MidtransController::class,'retry'])->middleware('menu:checkout,sales')->name('sales.payment.retry');
     Route::post('/sales/{id}/payment/cancel',[MidtransController::class,'cancel'])->middleware('menu:checkout,sales')->name('sales.payment.cancel');
     Route::get('/integration',[IntegrationController::class,'index'])->middleware('menu:integration')->name('integration');
+    Route::get('/integration/reconciliation',[LoyaltyReconciliationController::class,'index'])->middleware('menu:integration')->name('integration.reconciliation');
+    Route::get('/integration/reconciliation/{runId}',[LoyaltyReconciliationController::class,'index'])->middleware('menu:integration')->name('integration.reconciliation.show');
+    Route::post('/integration/reconciliation/check',[LoyaltyReconciliationController::class,'check'])->middleware('menu:integration')->name('integration.reconciliation.check');
+    Route::post('/integration/reconciliation/items/{itemId}/retry',[LoyaltyReconciliationController::class,'retry'])->middleware('menu:integration')->name('integration.reconciliation.retry');
     Route::post('/integration/connect',[IntegrationController::class,'connect'])->middleware('menu:integration')->name('integration.connect');
     Route::post('/integration/map',[IntegrationController::class,'map'])->middleware('menu:integration')->name('integration.map');
     Route::get('/integration/member',[IntegrationController::class,'member'])->middleware('menu:checkout')->name('integration.member');
