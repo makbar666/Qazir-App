@@ -111,8 +111,8 @@
                             <label class="payment-method-choice"><input type="radio" name="payment_method" value="qris" x-model="method"><span>{{ $midtransReady ? 'QRIS Midtrans' : 'QRIS manual' }}</span></label>
                         </div>
                     </fieldset>
-                    <div x-show="!dynamicQris"><label class="label">Jumlah diterima (Rp)</label><input class="field" type="number" name="amount_received" min="0" x-model.number="received" :required="!dynamicQris"></div>
-                    <p x-show="dynamicQris" class="self-end text-sm text-[#53745a]">Kode QR dibuat setelah transaksi disimpan. Poin masuk setelah Midtrans mengonfirmasi pembayaran.</p>
+                    <div class="sm:col-span-2" x-show="!dynamicQris"><label class="label" for="amount-received">Jumlah diterima (Rp)</label><input id="amount-received" class="field payment-received-field" type="number" name="amount_received" min="0" inputmode="numeric" x-model.number="received" :required="!dynamicQris"></div>
+                    <p x-show="dynamicQris" class="self-end text-sm text-[#53745a] sm:col-span-2">Kode QR dibuat setelah transaksi disimpan. Poin masuk setelah Midtrans mengonfirmasi pembayaran.</p>
                 </div>
             </div>
         </div>

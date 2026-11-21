@@ -182,6 +182,7 @@ main, .motion-page { animation: page-enter 190ms var(--motion-ease) backwards; }
 .btn-light:hover, .btn-quiet:hover { border-color: #b7cbb8; background: #f7faf6; }
 .btn-quiet { border-color: transparent; background: transparent; }
 .field { min-height: 35px; border-radius: 6px; padding: 7px 10px; font-size: 12.5px; }
+.field.payment-received-field { min-height: 52px; padding: 10px 14px; font-size: 18px; font-weight: 650; font-variant-numeric: tabular-nums; }
 .label { margin-bottom: 5px; color: #536456; font-size: 11px; font-weight: 650; }
 .payment-methods { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
 .payment-method-choice { position: relative; display: flex; min-height: 35px; align-items: center; justify-content: center; border: 1px solid #d9ded7; border-radius: 6px; background: #fff; color: #35473a; cursor: pointer; font-size: 12.5px; font-weight: 600; text-align: center; transition: border-color 140ms var(--motion-ease), background-color 140ms var(--motion-ease), color 140ms var(--motion-ease); }
