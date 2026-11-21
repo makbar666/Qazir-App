@@ -93,7 +93,17 @@
                 <div class="text-xs font-bold uppercase tracking-[.15em] text-[#698773]">{{ $integrationReady ? '03' : '02' }} / Pembayaran</div>
                 <h2 class="mt-2 text-lg font-semibold">Rincian pembayaran</h2>
                 <div class="mt-5 grid gap-4 sm:grid-cols-2">
-                    <div><label class="label">Diskon transaksi (Rp)</label><input class="field" type="number" name="discount" min="0" x-model.number="discount" required></div>
+                    <div>
+                        <label class="inline-flex min-h-[35px] cursor-pointer items-center gap-2 text-sm font-medium text-[#35473a]">
+                            <input type="checkbox" class="h-4 w-4 accent-[#245c43]" x-model="discountEnabled" @change="if (!$event.target.checked) discount = 0">
+                            Gunakan diskon transaksi
+                        </label>
+                        <input type="hidden" name="discount" :value="appliedDiscount">
+                        <div class="mt-2" x-show="discountEnabled" x-transition.opacity.duration.150ms style="display:none">
+                            <label class="label" for="transaction-discount">Nominal diskon (Rp)</label>
+                            <input id="transaction-discount" class="field" type="number" min="0" step="1" x-model.number="discount" :required="discountEnabled">
+                        </div>
+                    </div>
                     <fieldset>
                         <legend class="label">Metode pembayaran</legend>
                         <div class="payment-methods">
@@ -112,7 +122,7 @@
             <div class="space-y-4 p-6 text-sm">
                 <div class="flex justify-between"><span class="text-[#728076]">Item dipilih</span><strong x-text="selectedCount"></strong></div>
                 <div class="flex justify-between"><span class="text-[#728076]">Subtotal</span><span x-text="rupiah(subtotal)"></span></div>
-                <div class="flex justify-between"><span class="text-[#728076]">Diskon</span><span x-text="'- '+rupiah(discount)"></span></div>
+                <div class="flex justify-between" x-show="discountEnabled"><span class="text-[#728076]">Diskon</span><span x-text="'- '+rupiah(appliedDiscount)"></span></div>
                 <div class="flex justify-between" x-show="redeemPoints > 0"><span class="text-[#728076]">Tukar poin</span><span x-text="'- '+rupiah(redeemValue)"></span></div>
                 <div class="border-t pt-4 flex justify-between"><span>Kembalian</span><strong class="text-[#2b7a4b]" x-text="rupiah(change)"></strong></div>
                 <p class="rounded-lg bg-amber-50 p-3 text-xs text-amber-800" x-show="!submitting && paymentProblem && !submitError" x-text="paymentProblem"></p>
@@ -125,7 +135,7 @@
 </div>
 <script>
 function posCheckout(products,midtransReady,operatorRole,cashShiftOpen,cashShiftEnforced){return {
-    products,midtransReady,operatorRole,cashShiftOpen,cashShiftEnforced,method:'cash',qty:{},productQuery:'',productPage:1,discount:0,received:0,memberQuery:'',member:null,redemption:null,redeemPoints:0,results:[],memberMessage:'',searching:false,searchRequest:0,submitting:false,submitError:'',
+    products,midtransReady,operatorRole,cashShiftOpen,cashShiftEnforced,method:'cash',qty:{},productQuery:'',productPage:1,discountEnabled:false,discount:0,received:0,memberQuery:'',member:null,redemption:null,redeemPoints:0,results:[],memberMessage:'',searching:false,searchRequest:0,submitting:false,submitError:'',
     matchesProduct(name,sku){const query=this.productQuery.trim().toLocaleLowerCase('id-ID');return !query || String(name).toLocaleLowerCase('id-ID').includes(query) || String(sku).toLocaleLowerCase('id-ID').includes(query)},
     get filteredProducts(){return this.products.filter(p=>this.matchesProduct(p.name,p.sku))},
     get totalProductPages(){return Math.max(1,Math.ceil(this.filteredProducts.length/5))},
@@ -160,21 +170,22 @@ function posCheckout(products,midtransReady,operatorRole,cashShiftOpen,cashShift
     get subtotal(){return this.products.reduce((n,p)=>n+(Number(this.qty[p.id])||0)*Number(p.price),0)},
     get eligibleSubtotal(){return this.products.reduce((n,p)=>n+(p.point_eligible?(Number(this.qty[p.id])||0)*Number(p.price):0),0)},
     get redeemValue(){return (Number(this.redeemPoints)||0)*Number(this.redemption?.redeem_value||0)},
-    get total(){return Math.max(0,this.subtotal-(Number(this.discount)||0)-this.redeemValue)},
+    get appliedDiscount(){return this.discountEnabled ? Number(this.discount)||0 : 0},
+    get total(){return Math.max(0,this.subtotal-this.appliedDiscount-this.redeemValue)},
     get change(){return Math.max(0,(Number(this.received)||0)-this.total)},
     get dynamicQris(){return this.midtransReady && this.method==='qris'},
     get paymentProblem(){
         if(this.method==='cash' && this.cashShiftEnforced && !this.cashShiftOpen)return 'Buka shift kasir sebelum menerima pembayaran tunai.';
         if(!this.selectedCount)return 'Pilih minimal satu produk sebelum mencatat pembayaran.';
         if(this.products.some(p=>Number(this.qty[p.id]||0)>Number(p.quantity) || Number(this.qty[p.id]||0)<0 || !Number.isInteger(Number(this.qty[p.id]||0))))return 'Jumlah produk harus sesuai stok yang tersedia.';
-        if(Number(this.discount)<0 || Number(this.discount)>this.subtotal)return 'Diskon tidak boleh melebihi subtotal.';
+        if(this.appliedDiscount<0 || this.appliedDiscount>this.subtotal)return 'Diskon tidak boleh melebihi subtotal.';
         if(Number(this.redeemPoints)>0){
             if(!this.member||!this.redemption)return 'Pilih member dengan aturan penukaran poin aktif.';
             if(!Number.isInteger(Number(this.redeemPoints)))return 'Jumlah poin harus bilangan bulat.';
             if(Number(this.redeemPoints)<Number(this.redemption.minimum_redeem))return `Minimal ${this.redemption.minimum_redeem} poin untuk ditukar.`;
             if(Number(this.redeemPoints)>Number(this.member.point_balance))return 'Saldo poin member tidak cukup.';
             if(!['owner','manager'].includes(this.operatorRole) && Number(this.redeemPoints)>=Number(this.redemption.approval_threshold))return 'Penukaran ini harus diproses oleh manager atau owner.';
-            const limit=Math.floor(Math.max(0,this.eligibleSubtotal-Number(this.discount))*Number(this.redemption.maximum_redeem_percent)/100);
+            const limit=Math.floor(Math.max(0,this.eligibleSubtotal-this.appliedDiscount)*Number(this.redemption.maximum_redeem_percent)/100);
             if(this.redeemValue>limit)return 'Penukaran melebihi batas nilai produk yang menghasilkan poin.';
         }
         if(this.dynamicQris && this.total<1)return 'QRIS memerlukan total minimal Rp1.';
