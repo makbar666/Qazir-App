@@ -95,13 +95,13 @@
                 <div class="mt-5 grid gap-4 sm:grid-cols-2">
                     <div>
                         <label class="inline-flex min-h-[35px] cursor-pointer items-center gap-2 text-sm font-medium text-[#35473a]">
-                            <input type="checkbox" class="h-4 w-4 accent-[#245c43]" x-model="discountEnabled" @change="if (!$event.target.checked) discount = 0">
+                            <input type="checkbox" class="h-4 w-4 accent-[#245c43]" x-model="discountEnabled" @change="if (!$event.target.checked) { discount = 0; discountDisplay = '0' }">
                             Gunakan diskon transaksi
                         </label>
                         <input type="hidden" name="discount" :value="appliedDiscount">
                         <div class="mt-2" x-show="discountEnabled" x-transition.opacity.duration.150ms style="display:none">
                             <label class="label" for="transaction-discount">Nominal diskon (Rp)</label>
-                            <input id="transaction-discount" class="field" type="number" min="0" step="1" x-model.number="discount" :required="discountEnabled">
+                            <input id="transaction-discount" class="field" type="text" inputmode="numeric" autocomplete="off" maxlength="19" :value="discountDisplay" @input="updateMoneyInput($event, 'discount')" @blur="if (!discountDisplay) discountDisplay = '0'" :required="discountEnabled">
                         </div>
                     </div>
                     <fieldset>
@@ -111,7 +111,11 @@
                             <label class="payment-method-choice"><input type="radio" name="payment_method" value="qris" x-model="method"><span>{{ $midtransReady ? 'QRIS Midtrans' : 'QRIS manual' }}</span></label>
                         </div>
                     </fieldset>
-                    <div class="sm:col-span-2" x-show="!dynamicQris"><label class="label" for="amount-received">Jumlah diterima (Rp)</label><input id="amount-received" class="field payment-received-field" type="number" name="amount_received" min="0" inputmode="numeric" x-model.number="received" :required="!dynamicQris"></div>
+                    <div class="sm:col-span-2" x-show="!dynamicQris">
+                        <label class="label" for="amount-received">Jumlah diterima (Rp)</label>
+                        <input type="hidden" name="amount_received" :value="received">
+                        <input id="amount-received" class="field payment-received-field" type="text" inputmode="numeric" autocomplete="off" maxlength="19" :value="receivedDisplay" @input="updateMoneyInput($event, 'received')" @blur="if (!receivedDisplay) receivedDisplay = '0'" :required="!dynamicQris">
+                    </div>
                     <p x-show="dynamicQris" class="self-end text-sm text-[#53745a] sm:col-span-2">Kode QR dibuat setelah transaksi disimpan. Poin masuk setelah Midtrans mengonfirmasi pembayaran.</p>
                 </div>
             </div>
@@ -135,7 +139,22 @@
 </div>
 <script>
 function posCheckout(products,midtransReady,operatorRole,cashShiftOpen,cashShiftEnforced){return {
-    products,midtransReady,operatorRole,cashShiftOpen,cashShiftEnforced,method:'cash',qty:{},productQuery:'',productPage:1,discountEnabled:false,discount:0,received:0,memberQuery:'',member:null,redemption:null,redeemPoints:0,results:[],memberMessage:'',searching:false,searchRequest:0,submitting:false,submitError:'',
+    products,midtransReady,operatorRole,cashShiftOpen,cashShiftEnforced,method:'cash',qty:{},productQuery:'',productPage:1,discountEnabled:false,discount:0,discountDisplay:'0',received:0,receivedDisplay:'0',memberQuery:'',member:null,redemption:null,redeemPoints:0,results:[],memberMessage:'',searching:false,searchRequest:0,submitting:false,submitError:'',
+    updateMoneyInput(event,field){
+        const input=event.target;
+        const digitsBeforeCaret=input.value.slice(0,input.selectionStart??input.value.length).replace(/\D/g,'').length;
+        const digits=input.value.replace(/\D/g,'').replace(/^0+(?=\d)/,'').slice(0,15);
+        const formatted=digits.replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+        this[field]=Number(digits||0);
+        this[field+'Display']=formatted;
+        input.value=formatted;
+        let caret=0,seen=0;
+        while(caret<formatted.length&&seen<Math.min(digitsBeforeCaret,digits.length)){
+            if(/\d/.test(formatted[caret]))seen++;
+            caret++;
+        }
+        input.setSelectionRange(caret,caret);
+    },
     matchesProduct(name,sku){const query=this.productQuery.trim().toLocaleLowerCase('id-ID');return !query || String(name).toLocaleLowerCase('id-ID').includes(query) || String(sku).toLocaleLowerCase('id-ID').includes(query)},
     get filteredProducts(){return this.products.filter(p=>this.matchesProduct(p.name,p.sku))},
     get totalProductPages(){return Math.max(1,Math.ceil(this.filteredProducts.length/5))},
