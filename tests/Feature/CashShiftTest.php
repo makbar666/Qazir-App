@@ -60,7 +60,7 @@ class CashShiftTest extends TestCase
         $this->assertDatabaseHas('cash_shifts', ['id' => $second->id, 'expected_cash' => 11000, 'difference' => 0]);
     }
 
-    public function test_other_cashier_cannot_manage_shift_and_noncash_sale_does_not_require_one(): void
+    public function test_other_cashier_cannot_manage_shift_and_qris_sale_does_not_require_one(): void
     {
         [$owner, $outlet, $product] = $this->setupOutlet();
         $cashier = User::factory()->create(['business_id' => $owner->business_id, 'outlet_id' => $outlet, 'role' => 'cashier']);
@@ -69,8 +69,10 @@ class CashShiftTest extends TestCase
         $this->actingAs($cashier)->get('/shifts/'.$shift->id)->assertNotFound();
         $this->post('/shifts/'.$shift->id.'/close', ['actual_cash' => 10000])->assertNotFound();
         $this->post('/checkout', $this->sale($product))->assertSessionHasErrors('payment_method');
-        $this->post('/checkout', $this->sale($product, 'card'))->assertRedirect();
-        $this->assertDatabaseHas('sales', ['payment_method' => 'card', 'cash_shift_id' => null]);
+        $this->post('/checkout', $this->sale($product, 'card'))->assertSessionHasErrors('payment_method');
+        $this->post('/checkout', $this->sale($product, 'transfer'))->assertSessionHasErrors('payment_method');
+        $this->post('/checkout', $this->sale($product, 'qris'))->assertRedirect();
+        $this->assertDatabaseHas('sales', ['payment_method' => 'qris', 'cash_shift_id' => null]);
         $this->actingAs($owner)->post('/shifts/'.$shift->id.'/close', ['actual_cash' => 10000])->assertRedirect();
     }
 }

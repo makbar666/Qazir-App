@@ -98,7 +98,7 @@ class PosController extends Controller
         $data=$r->validate([
             'request_key'=>'required|uuid','items'=>'required|array|min:1',
             'items.*.product_id'=>'required|integer','items.*.quantity'=>'required|integer|min:1|max:1000',
-            'discount'=>'required|integer|min:0','payment_method'=>['required',Rule::in(['cash','transfer','qris','card'])],
+            'discount'=>'required|integer|min:0','payment_method'=>['required',Rule::in(['cash','qris'])],
             'amount_received'=>'nullable|integer|min:0','member_external_id'=>'nullable|integer|min:1','redeem_points'=>'nullable|integer|min:0',
         ]);
         $business=$r->user()->business_id;

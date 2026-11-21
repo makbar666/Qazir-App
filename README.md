@@ -45,7 +45,7 @@ Aktifkan kemampuan refund pada akun Midtrans bila Refund API mengembalikan penol
 
 ## Batas saat ini
 
-Pembayaran tunai, transfer, kartu, dan QRIS ketika Midtrans tidak aktif dikonfirmasi manual oleh kasir. Pengelolaan staf/outlet lewat UI, retur parsial, pajak, dan mode offline belum tersedia. Satu akun owner dan satu outlet pertama dibuat oleh installer. Akses data dibatasi ke bisnis dan outlet akun.
+Transaksi baru hanya menerima Tunai dan QRIS. QRIS ketika Midtrans tidak aktif dikonfirmasi manual oleh kasir. Riwayat transaksi Transfer dan Kartu yang sudah ada tetap dapat dibuka dan dilaporkan. Retur parsial, pajak, dan mode offline belum tersedia. Satu akun owner dan satu outlet pertama dibuat oleh installer. Akses data dibatasi ke bisnis dan outlet akun.
 
 ## Integrasi Tanda
 

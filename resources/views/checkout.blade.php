@@ -94,7 +94,13 @@
                 <h2 class="mt-2 text-lg font-semibold">Rincian pembayaran</h2>
                 <div class="mt-5 grid gap-4 sm:grid-cols-2">
                     <div><label class="label">Diskon transaksi (Rp)</label><input class="field" type="number" name="discount" min="0" x-model.number="discount" required></div>
-                    <div><label class="label">Metode pembayaran</label><select class="field" name="payment_method" x-model="method"><option value="cash">Tunai</option><option value="qris">{{ $midtransReady ? 'QRIS dinamis Midtrans' : 'QRIS manual' }}</option><option value="transfer">Transfer</option><option value="card">Kartu</option></select></div>
+                    <fieldset>
+                        <legend class="label">Metode pembayaran</legend>
+                        <div class="payment-methods">
+                            <label class="payment-method-choice"><input type="radio" name="payment_method" value="cash" x-model="method" checked><span>Tunai</span></label>
+                            <label class="payment-method-choice"><input type="radio" name="payment_method" value="qris" x-model="method"><span>{{ $midtransReady ? 'QRIS Midtrans' : 'QRIS manual' }}</span></label>
+                        </div>
+                    </fieldset>
                     <div x-show="!dynamicQris"><label class="label">Jumlah diterima (Rp)</label><input class="field" type="number" name="amount_received" min="0" x-model.number="received" :required="!dynamicQris"></div>
                     <p x-show="dynamicQris" class="self-end text-sm text-[#53745a]">Kode QR dibuat setelah transaksi disimpan. Poin masuk setelah Midtrans mengonfirmasi pembayaran.</p>
                 </div>
