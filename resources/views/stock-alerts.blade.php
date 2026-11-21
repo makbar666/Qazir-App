@@ -1,0 +1,28 @@
+@extends('layout')
+@section('title', 'Stok menipis')
+@section('content')
+<div class="workspace-heading"><div><p class="eyebrow">Inventaris / {{ $outletName }}</p><h1>Stok menipis</h1><p>Atur batas dan target stok per produk untuk outlet aktif.</p></div>@if($canManage && $lowProducts->contains(fn ($item) => $item->suggested_quantity > 0) && \App\Support\RoleAccess::allowsMenu(auth()->user(), 'purchases'))<a class="btn btn-primary" href="{{ route('purchases.create', ['suggested' => 1]) }}">Buat pesanan dari saran →</a>@endif</div>
+
+<section class="surface mb-5"><div class="border-b border-slate-200 px-5 py-4"><h2 class="font-semibold">Perlu diperiksa <span class="text-slate-500">({{ $lowProducts->count() }})</span></h2><p class="text-sm text-slate-500">Produk tampil saat stok sama dengan atau di bawah batas minimum. Saran pesan mengurangi jumlah yang masih dalam pesanan pembelian.</p></div><div class="overflow-x-auto"><table class="table"><thead><tr><th>Produk</th><th class="amount-column">Stok</th><th class="amount-column">Minimum</th><th class="amount-column">Dalam pesanan</th><th class="amount-column">Saran pesan</th></tr></thead><tbody>
+@forelse($lowProducts as $item)
+<tr><td class="font-semibold">{{ $item->name }}<small class="block font-normal text-slate-500">{{ $item->sku }}</small></td><td class="amount-column">{{ number_format($item->quantity, 0, ',', '.') }}</td><td class="amount-column">{{ number_format($item->minimum_quantity, 0, ',', '.') }}</td><td class="amount-column">{{ number_format($item->incoming_quantity, 0, ',', '.') }}</td><td class="amount-column font-semibold">{{ number_format($item->suggested_quantity, 0, ',', '.') }}</td></tr>
+@empty
+<tr><td colspan="5" class="empty-cell">Tidak ada produk yang mencapai batas minimum.</td></tr>
+@endforelse
+</tbody></table></div></section>
+
+<div class="grid gap-5 xl:grid-cols-[1fr_340px]">
+<section class="surface"><div class="border-b border-slate-200 p-5"><h2 class="font-semibold">Batas stok produk</h2><p class="text-sm text-slate-500">Kosongkan minimum untuk menonaktifkan peringatan produk.</p><form method="get" class="mt-4 flex gap-2"><input class="field" type="search" name="q" value="{{ $search }}" placeholder="Cari produk atau SKU" aria-label="Cari produk"><button class="btn btn-light">Cari</button></form></div><div class="overflow-x-auto"><table class="table"><thead><tr><th>Produk</th><th class="amount-column">Stok</th><th>Minimum</th><th>Target</th>@if($canManage)<th>Aksi</th>@endif</tr></thead><tbody>
+@forelse($products as $product)
+<tr><td class="font-semibold">{{ $product->name }}<small class="block font-normal text-slate-500">{{ $product->sku }}</small></td><td class="amount-column">{{ number_format($product->quantity, 0, ',', '.') }}</td>@if($canManage)<td colspan="3"><form method="post" action="{{ route('stock_alerts.rules', $product->id) }}" class="flex flex-wrap items-center gap-2">@csrf @method('PUT')<input class="field !w-24" type="number" name="minimum_quantity" min="0" max="2147483646" value="{{ $product->minimum_quantity }}" placeholder="Nonaktif" aria-label="Minimum {{ $product->name }}"><input class="field !w-24" type="number" name="target_quantity" min="1" max="2147483647" value="{{ $product->target_quantity }}" placeholder="Target" aria-label="Target {{ $product->name }}"><button class="btn btn-light">Simpan</button></form></td>@else<td>{{ $product->minimum_quantity ?? '—' }}</td><td>{{ $product->target_quantity ?? '—' }}</td>@endif</tr>
+@empty
+<tr><td colspan="{{ $canManage ? 5 : 4 }}" class="empty-cell">Tidak ada produk untuk filter ini.</td></tr>
+@endforelse
+</tbody></table></div><div class="pagination-bar">{{ $products->links() }}</div></section>
+
+<aside class="surface h-fit p-5"><h2 class="font-semibold">Email peringatan</h2><p class="mt-1 text-sm text-slate-500">Ringkasan dikirim sekali sehari per penerima jika ada stok menipis.</p><div class="mt-4 border-y border-slate-200 py-3 text-sm"><div class="flex justify-between gap-3"><span class="text-slate-500">Jadwal</span><strong>{{ config('stock-alerts.daily_time') }} {{ config('stock-alerts.timezone') }}</strong></div><div class="mt-2 flex justify-between gap-3"><span class="text-slate-500">Pengiriman</span><strong>{{ $mailDriver === 'log' ? 'Mode log' : strtoupper($mailDriver) }}</strong></div>@if($lastDelivery)<div class="mt-2 flex justify-between gap-3"><span class="text-slate-500">Terakhir diproses</span><strong>{{ \Carbon\Carbon::parse($lastDelivery->sent_at)->format('d M Y, H:i') }}</strong></div>@endif</div>
+@if($mailDriver === 'log')<p class="mt-3 text-xs text-amber-800">Email saat ini ditulis ke log server. Atur MAIL_MAILER dan kredensial SMTP agar benar-benar terkirim.</p>@endif
+@if($canManage)<form method="post" action="{{ route('stock_alerts.email') }}" class="mt-4 grid gap-3">@csrf @method('PUT')<div><label class="label" for="stock-alert-recipients">Penerima email</label><textarea class="field" id="stock-alert-recipients" name="recipients" rows="4" maxlength="2000" placeholder="owner@toko.com&#10;manager@toko.com">{{ old('recipients', implode("\n", json_decode($settings?->recipient_emails ?? '[]', true) ?: [])) }}</textarea><p class="mt-1 text-xs text-slate-500">Satu alamat per baris, maksimal 10.</p></div><label class="flex items-center gap-2 text-sm"><input type="hidden" name="email_enabled" value="0"><input type="checkbox" name="email_enabled" value="1" @checked(old('email_enabled', $settings?->email_enabled ?? false))>Aktifkan email harian</label><button class="btn btn-primary">Simpan pengaturan email</button></form>@endif
+</aside>
+</div>
+@endsection
